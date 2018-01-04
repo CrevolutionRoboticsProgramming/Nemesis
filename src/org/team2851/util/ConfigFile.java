@@ -46,7 +46,7 @@ public class ConfigFile
     }
 
     public static ConfigFile getInstance()
-    {
+     {
         return sInstance;
     }
 
@@ -63,7 +63,7 @@ public class ConfigFile
         boolean isInverted = false;
 
         try {
-            element = getElement(document.getRootElement(), name);
+            element = getElement("CANTalon", name);
         } catch (ElementNotFoundException e) {
             System.err.println("CANTalon [" + name + "] was not found in XML sheet");
             throw e;
@@ -71,14 +71,19 @@ public class ConfigFile
 
         try {
             port = element.getAttribute("port").getIntValue();
-            isInverted = element.getAttribute("isInverted").getBooleanValue();
         } catch (DataConversionException e) {
             System.err.println("CANTalon [" + name + "] could not configure port");
             return null;
         }
 
+        try {
+            isInverted = element.getAttribute("isInverted").getBooleanValue();
+        } catch (DataConversionException e) { }
+
         talon = new CANTalon(port);
         talon.setInverted(isInverted);
+
+        System.out.println("CANTalon [" + name + "] was created on port " + port + ":\n\tisInverted: true");
 
         return talon;
     }
@@ -91,20 +96,20 @@ public class ConfigFile
 
     public double getDouble(String name) throws ElementNotFoundException, DataConversionException
     {
-        Element element = getElement(document.getRootElement(), name);
+        Element element = getElement("Double", name);
         return element.getAttribute("value").getDoubleValue();
     }
 
     public boolean getBoolean(String name) throws ElementNotFoundException, DataConversionException
     {
-        Element element = getElement(document.getRootElement(), name);
+        Element element = getElement("Boolean", name);
         return element.getAttribute("value").getBooleanValue();
     }
 
     public PID getPid(String name) throws ElementNotFoundException, DataConversionException
     {
         double p, i, d;
-        Element element = getElement(document.getRootElement(), name);
+        Element element = getElement("PID", name);
         if (element.getAttribute("p") != null) p = element.getAttribute("p").getDoubleValue();
         else return null;
 
@@ -325,12 +330,15 @@ public class ConfigFile
         }
         return controller;
     }
-
-    private Element getElement(Element baseElement, String name) throws ElementNotFoundException
+    // TODO: [Change]: Added tag filter and removed root element argument
+    private Element getElement(String name, String id) throws ElementNotFoundException
     {
-        List<Element> elements = baseElement.getChildren();
+        List<Element> elements = document.getRootElement().getChildren();
         for (Element e : elements)
-            if (e.getAttributeValue("name").equals(name)) return e;
+        {
+            if (!e.getName().equals(name)) continue;
+            if (e.getAttribute("name").getValue().equals(id)) return e;
+        }
         throw new ElementNotFoundException();
     }
 }

@@ -1,7 +1,7 @@
 package org.team2851.robot;
 
 import com.ctre.CANTalon;
-import org.team2851.robot.subsystem.LoneTalon;
+import org.jdom2.DataConversionException;
 import org.team2851.util.*;
 import org.team2851.util.subsystem.Subsystem;
 
@@ -15,8 +15,6 @@ public class Robot extends CrevoRobot
 
     public Robot()
     {
-        registerSubsystem(LoneTalon.getInstance());
-
         try {
             pilot = ConfigFile.getController("pilot.xml");
         } catch (ElementNotFoundException e) {

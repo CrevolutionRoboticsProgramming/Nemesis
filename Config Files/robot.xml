@@ -1,6 +1,8 @@
-<Robot name="Cadmus">
-    <CANTalon port="1" name="leftA"/>
-    <CANTalon port="3" name="leftB"/>
-    <CANTalon port="2" name="rightA"/>
-    <CANTalon port="4" name="rightB"/>
+<Robot name="Nemesis">
+    <CANTalon port="8" name="talonLeftA" isInverted="true"/>
+    <CANTalon port="1" name="talonLeftB"/>
+    <CANTalon port="2" name="talonRightA"/>
+    <CANTalon port="3" name="talonRightB"/>
+    <PID name="shooterPid" p="0.5" i="0.001"/>
+    <Boolean value="true" name="isDriveTrainEnabled"/>
 </Robot>

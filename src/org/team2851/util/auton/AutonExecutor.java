@@ -1,6 +1,8 @@
 package org.team2851.util.auton;
 
-public class AntonExecutor
+import org.team2851.util.Logger;
+
+public class AutonExecutor
 {
     private Auton mAuton;
     private Thread mThread = null;
@@ -24,6 +26,7 @@ public class AntonExecutor
                 }
             };
             mThread.start();
+            Logger.println("Starting ");
         }
     }
 

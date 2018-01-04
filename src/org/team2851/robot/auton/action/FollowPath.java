@@ -1,12 +1,13 @@
 package org.team2851.robot.auton.action;
 
 import edu.wpi.first.wpilibj.Timer;
-import org.team2851.robot.subsystem.TankDrive;
 import org.team2851.util.auton.Action;
 import org.team2851.util.field.Path;
 
-public class FollowPath implements Action
+// abstract is temp (note: code still good but deleted dependencies for clean slate)
+public abstract class FollowPath implements Action
 {
+    /*
     private Path path;
     private double distance, angle;
     private TankDrive tankDrive = TankDrive.getInstance();
@@ -52,4 +53,5 @@ public class FollowPath implements Action
         angle = path.getAngle();
         timer.start();
     }
+    */
 }

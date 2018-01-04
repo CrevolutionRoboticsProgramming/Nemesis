@@ -97,5 +97,6 @@ public abstract class Subsystem extends Thread
         if (!command.isFinished())
             command.interrupt();
         isAlive = false;
+        Logger.println("Halting Subsystem: " + mName);
     }
 }

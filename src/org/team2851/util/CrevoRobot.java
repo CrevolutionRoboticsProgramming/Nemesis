@@ -1,8 +1,9 @@
 package org.team2851.util;
 
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.team2851.util.auton.Auton;
-import org.team2851.util.auton.AntonExecutor;
+import org.team2851.util.auton.AutonExecutor;
 import org.team2851.util.subsystem.Subsystem;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -11,7 +12,7 @@ import java.util.Vector;
 
 public class CrevoRobot extends IterativeRobot
 {
-    private AntonExecutor mAntonExecutor = new AntonExecutor();
+    private AutonExecutor mAutonExecutor = new AutonExecutor();
     private Vector<Subsystem> mSubsystems = new Vector<>();
     private SendableChooser autonomousChooser, subsystemChooser;
     private Subsystem testSubsystem;
@@ -24,6 +25,7 @@ public class CrevoRobot extends IterativeRobot
 
     protected CrevoRobot()
     {
+        Logger.start();
         autonomousChooser = new SendableChooser();
         subsystemChooser = new SendableChooser();
     }
@@ -41,6 +43,7 @@ public class CrevoRobot extends IterativeRobot
         for (Subsystem s : mSubsystems) s.start();
         SmartDashboard.putData("Autonomous Mode", autonomousChooser);
         Logger.printerr("Test");
+
     }
 
     @Override
@@ -48,8 +51,8 @@ public class CrevoRobot extends IterativeRobot
     {
         Auton autonSelected = (Auton)autonomousChooser.getSelected();
         Logger.println("|-----[AUTON]-----|\nAuton Selected: " + autonSelected.getName());
-        mAntonExecutor.setAuton(autonSelected);
-        mAntonExecutor.start();
+        mAutonExecutor.setAuton(autonSelected);
+        mAutonExecutor.start();
     }
 
     @Override
@@ -65,7 +68,7 @@ public class CrevoRobot extends IterativeRobot
     {
         Logger.println("|-----[DISABLED]-----|\nAll subsystems being set to default command");
         for (Subsystem s : mSubsystems) { s.setCommand(s.getDefaultCommand()); }
-        mAntonExecutor.stop();
+        mAutonExecutor.stop();
     }
 
     // Eliminated Functions
