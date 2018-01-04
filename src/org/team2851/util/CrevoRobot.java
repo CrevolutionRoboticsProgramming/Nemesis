@@ -42,7 +42,6 @@ public class CrevoRobot extends IterativeRobot
         Logger.println("|-----[ROBOT INIT]-----|");
         for (Subsystem s : mSubsystems) s.start();
         SmartDashboard.putData("Autonomous Mode", autonomousChooser);
-        Logger.printerr("Test");
 
     }
 
