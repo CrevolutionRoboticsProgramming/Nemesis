@@ -9,6 +9,7 @@ public class Robot extends CrevoRobot
 {
     /*
      *  Current Configuration: Talos (2017 Season/Steamworks)
+     *  kfdkjsglkkghviaejriauerahdkvcjashfljhbvasbcpsehbrfqwvgawegriugaigdkjcbvlewgiebflk
      */
     public static Controller pilot, copilot;
     CANTalon talon;
