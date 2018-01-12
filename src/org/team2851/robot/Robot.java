@@ -1,7 +1,10 @@
 package org.team2851.robot;
 
-import com.ctre.CANTalon;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import org.jdom2.DataConversionException;
+import org.team2851.robot.subsystem.Intake;
 import org.team2851.util.*;
 import org.team2851.util.subsystem.Subsystem;
 
@@ -12,15 +15,10 @@ public class Robot extends CrevoRobot
      *  kfdkjsglkkghviaejriauerahdkvcjashfljhbvasbcpsehbrfqwvgawegriugaigdkjcbvlewgiebflk
      */
     public static Controller pilot, copilot;
-    CANTalon talon;
+    TalonSRX talon;
 
     public Robot()
     {
-        try {
-            pilot = ConfigFile.getController("pilot.xml");
-        } catch (ElementNotFoundException e) {
-            Logger.printerr("Controller config not found! Disabling teleop!");
-            Subsystem.teleopEnabled = false;
-        }
+        registerSubsystem(Intake.getInstance());
     }
 }

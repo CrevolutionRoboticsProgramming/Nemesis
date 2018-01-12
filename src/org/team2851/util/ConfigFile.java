@@ -1,7 +1,6 @@
 package org.team2851.util;
 
-import com.ctre.CANTalon;
-import org.team2851.util.RobotConstants;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import org.jdom2.DataConversionException;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -45,34 +44,31 @@ public class ConfigFile
         }
     }
 
-    public static ConfigFile getInstance()
-     {
-        return sInstance;
-    }
+    public static ConfigFile getInstance() { return sInstance; }
 
-    public String getRobotName() throws NullPointerException
-    {
-        return document.getRootElement().getAttributeValue("name");
-    }
+    public String getRobotName() throws NullPointerException { return document.getRootElement().getAttributeValue("name"); }
 
-    public CANTalon getCANTalon(String name) throws ElementNotFoundException
+    public TalonSRX getTalonSRX(String name) throws ElementNotFoundException
     {
-        CANTalon talon = null;
+        TalonSRX talon = null;
         Element element = null;
         int port;
-        boolean isInverted = false;
+        boolean isInverted = false, usePID = true;
+        double p, i, d, f;
+        List<Element> children = element.getChildren();
+        Element ePid = null;
 
         try {
-            element = getElement("CANTalon", name);
+            element = getElement("TalonSRX", name);
         } catch (ElementNotFoundException e) {
-            System.err.println("CANTalon [" + name + "] was not found in XML sheet");
+            System.err.println("TalonSRX [" + name + "] was not found in XML sheet");
             throw e;
         }
 
         try {
             port = element.getAttribute("port").getIntValue();
         } catch (DataConversionException e) {
-            System.err.println("CANTalon [" + name + "] could not configure port");
+            System.err.println("TalonSRX [" + name + "] could not configure port");
             return null;
         }
 
@@ -80,18 +76,37 @@ public class ConfigFile
             isInverted = element.getAttribute("isInverted").getBooleanValue();
         } catch (DataConversionException e) { }
 
-        talon = new CANTalon(port);
+        for (Element e : children)
+            if (e.getName().equals("PID")) ePid = e;
+
+        if (ePid != null)
+        {
+            try {
+                if (element.getAttribute("p") != null) p = element.getAttribute("p").getDoubleValue();
+                if (element.getAttribute("") != null) i = element.getAttribute("i").getDoubleValue();
+                if (element.getAttribute("") != null) i = element.getAttribute("i").getDoubleValue();
+            } catch (DataConversionException e) {
+                System.out.println("TalonSRX [" + name + "]: Failure to configure PID controller");
+                usePID = false;
+            }
+        }
+        
+        talon = new TalonSRX(port);
         talon.setInverted(isInverted);
+        if (usePID)
+        {
+            talon.config_kP(p);
+            talon.config_kI(i);
+            talon.config_kD(d);
+        }
 
-        System.out.println("CANTalon [" + name + "] was created on port " + port + ":\n\tisInverted: true");
-
+        System.out.println("TalonSRX [" + name + "] was created on port " + port + ":\n\tisInverted: true");
         return talon;
     }
 
-    public int getInt(String name)
-    {
-        //Element getElement(document.getRootElement(), name);
-        return 0;
+    public int getInt(String name) throws ElementNotFoundException, DataConversionException {
+        Element element = getElement("Int", name);
+        return element.getAttribute("value").getIntValue();
     }
 
     public double getDouble(String name) throws ElementNotFoundException, DataConversionException

@@ -1,6 +1,5 @@
 package org.team2851.util;
 
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.team2851.util.auton.Auton;
 import org.team2851.util.auton.AutonExecutor;
@@ -14,7 +13,7 @@ public class CrevoRobot extends IterativeRobot
 {
     private AutonExecutor mAutonExecutor = new AutonExecutor();
     private Vector<Subsystem> mSubsystems = new Vector<>();
-    private SendableChooser autonomousChooser, subsystemChooser;
+    private SendableChooser autonomousChooser;
     private Subsystem testSubsystem;
 
     protected final void registerAuton(Auton auton)
@@ -27,7 +26,6 @@ public class CrevoRobot extends IterativeRobot
     {
         Logger.start();
         autonomousChooser = new SendableChooser();
-        subsystemChooser = new SendableChooser();
     }
 
     protected final void registerSubsystem(Subsystem subsystem)
