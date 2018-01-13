@@ -54,8 +54,7 @@ public class ConfigFile
         Element element = null;
         int port;
         boolean isInverted = false, usePID = true;
-        double p, i, d, f;
-        List<Element> children = element.getChildren();
+        double p = -1, i = -1, d = -1;
         Element ePid = null;
 
         try {
@@ -76,6 +75,7 @@ public class ConfigFile
             isInverted = element.getAttribute("isInverted").getBooleanValue();
         } catch (DataConversionException e) { }
 
+        List<Element> children = element.getChildren();
         for (Element e : children)
             if (e.getName().equals("PID")) ePid = e;
 
@@ -95,9 +95,9 @@ public class ConfigFile
         talon.setInverted(isInverted);
         if (usePID)
         {
-            talon.config_kP(p);
-            talon.config_kI(i);
-            talon.config_kD(d);
+            talon.config_kP(0, p, 0);
+            talon.config_kI(0, i, 0);
+            talon.config_kD(0, d, 0);
         }
 
         System.out.println("TalonSRX [" + name + "] was created on port " + port + ":\n\tisInverted: true");
