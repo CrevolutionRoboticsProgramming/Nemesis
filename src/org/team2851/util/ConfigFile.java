@@ -1,6 +1,7 @@
 package org.team2851.util;
 
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import org.jdom2.DataConversionException;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -51,18 +52,11 @@ public class ConfigFile
     public TalonSRX getTalonSRX(String name) throws ElementNotFoundException
     {
         TalonSRX talon = null;
-        Element element = null;
+        Element element = getElement("TalonSRX", name);
         int port;
         boolean isInverted = false, usePID = true;
         double p = -1, i = -1, d = -1;
         Element ePid = null;
-
-        try {
-            element = getElement("TalonSRX", name);
-        } catch (ElementNotFoundException e) {
-            System.err.println("TalonSRX [" + name + "] was not found in XML sheet");
-            throw e;
-        }
 
         try {
             port = element.getAttribute("port").getIntValue();
@@ -101,6 +95,52 @@ public class ConfigFile
         }
 
         System.out.println("TalonSRX [" + name + "] was created on port " + port + ":\n\tisInverted: true");
+        return talon;
+    }
+
+    public WPI_TalonSRX getWPI_TalonSRX(String name) throws ElementNotFoundException
+    {
+        WPI_TalonSRX talon;
+        Element e = getElement("TalonSRX", name);
+        Element ePID = null;
+        List<Element> children = e.getChildren();
+        int port;
+        boolean isInverted = false;
+        double kP, kI, kD;
+
+        try {
+            port = e.getAttribute("port").getIntValue();
+        } catch (DataConversionException e1) {
+            Logger.printerr("TalonSRX [" + name + "]: Could not parse port!");
+            throw new ElementNotFoundException();
+        }
+
+        try {
+            isInverted = e.getAttribute("isInverted").getBooleanValue();
+            Logger.println("TalonSRX [" + name + "]: isInverted = " + isInverted);
+        } catch (DataConversionException e1) { }
+
+        talon = new WPI_TalonSRX(port);
+        talon.setInverted(isInverted);
+
+        for (Element el : children)
+            if (el.getName().equals("PID")) ePID = el;
+
+        if (ePID != null)
+        {
+            try {
+                kP = ePID.getAttribute("p").getDoubleValue();
+                kI = ePID.getAttribute("i").getDoubleValue();
+                kD = ePID.getAttribute("d").getDoubleValue();
+
+                talon.config_kP(0, kP, 0);
+                talon.config_kI(0, kI, 0);
+                talon.config_kD(0, kD, 0);
+            } catch (DataConversionException e1) {
+                Logger.printerr("TalonSRX [" + name + "]: Failed to parse PID");
+            }
+        }
+
         return talon;
     }
 
