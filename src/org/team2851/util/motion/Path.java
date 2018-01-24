@@ -1,4 +1,6 @@
-package org.team2851.util.field;
+package org.team2851.util.motion;
+
+import org.team2851.util.motion.Point2D;
 
 public abstract class Path
 {

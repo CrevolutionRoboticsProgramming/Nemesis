@@ -1,8 +1,6 @@
 package org.team2851.robot.auton.action;
 
-import edu.wpi.first.wpilibj.Timer;
 import org.team2851.util.auton.Action;
-import org.team2851.util.field.Path;
 
 // abstract is temp (note: code still good but deleted dependencies for clean slate)
 public abstract class FollowPath implements Action

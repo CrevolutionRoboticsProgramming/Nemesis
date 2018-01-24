@@ -1,4 +1,4 @@
-package org.team2851.util.field;
+package org.team2851.util.motion;
 
 public class Point2D // Represents a point on the field
 {

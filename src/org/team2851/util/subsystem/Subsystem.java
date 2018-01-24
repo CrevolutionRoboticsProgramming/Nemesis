@@ -34,14 +34,14 @@ public abstract class Subsystem extends Thread
 
         hasInit = false;
         this.command = command;
-        Logger.println("Setting " + mName + " command to " + command.getName());
+        logMessage("Setting command to " + command.getName());
     }
 
     private synchronized void runCommand()
     {
         if (!teleopEnabled && command.getName().equals("Teleop"))
         {
-            Logger.printerr("Teleop is Disabled!");
+            logError("Teleop is disabled");
             return;
         }
 
@@ -83,7 +83,7 @@ public abstract class Subsystem extends Thread
             init();
             isAlive = true;
             mThread.start();
-            Logger.println("Starting Subsystem: " + mName);
+            logMessage("Starting...");
         }
     }
 
@@ -99,4 +99,7 @@ public abstract class Subsystem extends Thread
         isAlive = false;
         Logger.println("Halting Subsystem: " + mName);
     }
+
+    protected void logError(String message) { Logger.printerr("Subsystem [" + mName + "]: " + message); }
+    protected void logMessage(String message) { Logger.println("Subsystem [" + mName + "]: " + message); }
 }

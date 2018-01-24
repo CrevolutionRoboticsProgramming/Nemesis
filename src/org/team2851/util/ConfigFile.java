@@ -89,6 +89,7 @@ public class ConfigFile
         talon.setInverted(isInverted);
         if (usePID)
         {
+            talon.selectProfileSlot(0, 0);
             talon.config_kP(0, p, 0);
             talon.config_kI(0, i, 0);
             talon.config_kD(0, d, 0);
