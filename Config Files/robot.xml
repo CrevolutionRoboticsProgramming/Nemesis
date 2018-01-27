@@ -1,8 +1,8 @@
 <Robot name="Nemesis">
-    <CANTalon port="8" name="talonLeftA" isInverted="true"/>
-    <CANTalon port="1" name="talonLeftB"/>
-    <CANTalon port="2" name="talonRightA"/>
-    <CANTalon port="3" name="talonRightB"/>
-    <PID name="shooterPid" p="0.5" i="0.001"/>
-    <Boolean value="true" name="isDriveTrainEnabled"/>
+    <TalonSRX port="14" name="talonLeftA" isInverted="false"/>
+    <TalonSRX port="12" name="talonLeftB" isInverted="false"/>
+    <TalonSRX port="29" name="talonRightA" isInverted="false"/>
+    <TalonSRX port="6" name="talonRightB" isInverted="false"/>
+    <Double name="driveMult" value="1"/>
 </Robot>
+tgy6

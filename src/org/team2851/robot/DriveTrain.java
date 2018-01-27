@@ -3,13 +3,10 @@ package org.team2851.robot;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-import edu.wpi.first.wpilibj.AnalogGyro;
-import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import org.team2851.util.ConfigFile;
-import org.team2851.util.Controller;
-import org.team2851.util.ElementNotFoundException;
-import org.team2851.util.Logger;
+import org.jdom2.DataConversionException;
+import org.team2851.util.*;
 import org.team2851.util.subsystem.Command;
 import org.team2851.util.subsystem.Subsystem;
 
@@ -21,41 +18,52 @@ public class DriveTrain extends Subsystem
 
     // Controllers/Actuators
     private WPI_TalonSRX leftA, leftB, rightA, rightB;
-    private AnalogGyro gyro;
+    private ADXRS450_Gyro gyro;
+
+    // Values
+    private double driveMult;
 
     @Override
     public void init()
     {
-        ConfigFile cf = ConfigFile.getInstance();
-        try {
-            leftA = cf.getWPI_TalonSRX("leftA");
-            leftB = cf.getWPI_TalonSRX("leftB");
-            rightA = cf.getWPI_TalonSRX("rightA");
-            rightB = cf.getWPI_TalonSRX("rightB");
+        Timer t = new Timer();
+//        ConfigFile cf = ConfigFile.getInstance();
+//        try {
+//
+//            leftA = cf.getWPI_TalonSRX("talonLeftA");
+//            leftB = cf.getWPI_TalonSRX("talonLeftB");
+//            rightA = cf.getWPI_TalonSRX("talonRightA");
+//            rightB = cf.getWPI_TalonSRX("talonRightB");
+//
+//            leftA.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 0);
+//            rightA.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 0);
+//            leftB.set(ControlMode.Follower, leftA.getDeviceID());
+//            rightB.set(ControlMode.Follower, rightA.getDeviceID());
+//
+//            leftA.configNominalOutputForward(0, 0);
+//            leftA.configNominalOutputReverse(0, 0);
+//            leftA.configPeakOutputForward(1, 0);
+//            leftA.configPeakOutputReverse(-1, 0);
+//            leftA.setSelectedSensorPosition(0, 0, 0);
+//
+//            rightA.configNominalOutputForward(0, 0);
+//            rightA.configNominalOutputReverse(0, 0);
+//            rightA.configPeakOutputForward(1, 0);
+//            rightA.configPeakOutputReverse(-1, 0);
+//
+//            driveMult = cf.getDouble("driveMult");
+//        } catch (ElementNotFoundException e) {
+//            Logger.printerr("Subsystem [DriveTrain]: Could not instantiate motor controllers!");
+//            isEnabled = false;
+//        } catch (DataConversionException ee) {
+//            logError("Could not convert driveMult");
+//            driveMult = 1;
+//        }
 
-            leftA.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 0);
-            rightA.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 0);
-            leftB.set(ControlMode.Follower, leftA.getDeviceID());
-            rightB.set(ControlMode.Follower, rightB.getDeviceID());
-
-            leftA.configNominalOutputForward(0, 0);
-            leftA.configNominalOutputReverse(0, 0);
-            leftA.configPeakOutputForward(1, 0);
-            leftA.configPeakOutputReverse(-1, 0);
-            leftA.setSelectedSensorPosition(0, 0, 0);
-
-            rightA.configNominalOutputForward(0, 0);
-            rightA.configNominalOutputReverse(0, 0);
-            rightA.configPeakOutputForward(1, 0);
-            rightA.configPeakOutputReverse(-1, 0);
-        } catch (ElementNotFoundException e) {
-            Logger.printerr("Subsystem [DriveTrain]: Could not instantiate motor controllers!");
-            isEnabled = false;
-        }
-
-        gyro = new AnalogGyro(0);
-        gyro.initGyro();
+        gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS2);
+        t.start();
         gyro.calibrate();
+        gyro.reset();
     }
 
     @Override
@@ -91,7 +99,7 @@ public class DriveTrain extends Subsystem
     @Override
     public Command getTeleopCommand() {
         return new Command() {
-            DifferentialDrive drive = new DifferentialDrive(leftA, rightA);
+            //DifferentialDrive drive = new DifferentialDrive(leftA, rightA);
             Controller c = Robot.pilot;
             Timer t = new Timer();
             @Override
@@ -99,24 +107,26 @@ public class DriveTrain extends Subsystem
 
             @Override
             public void start() {
+                //System.out.println(leftA.getDeviceID());
                 t.start();
-                leftA.set(ControlMode.PercentOutput, 0);
-                rightA.set(ControlMode.PercentOutput, 0);
+//                leftA.set(ControlMode.PercentOutput, 0);
+//                rightA.set(ControlMode.PercentOutput, 0);
             }
 
             @Override
             public void update()
             {
-                drive.curvatureDrive(c.leftY.getValue(), c.rightX.getValue(), c.leftBumper.getState());
-                if (t.get() % .2 == 0) System.out.print("Left -> Out: " + leftA.getMotorOutputPercent() + "   Vel: " +
-                        leftA.getSelectedSensorVelocity(0) + "\nRight -> Out: " + rightA.getMotorOutputPercent() +
-                        "   Vel: " + rightA.getSelectedSensorVelocity(0));
+//                drive.curvatureDrive(c.leftY.getValue() * driveMult, c.rightX.getValue() * driveMult, c.leftBumper.getState());
+//                if (t.get() % .2 == 0) System.out.print("Left -> Out: " + leftA.getMotorOutputPercent() + "   Vel: " +
+//                        leftA.getSelectedSensorVelocity(0) + "\nRight -> Out: " + rightA.getMotorOutputPercent() +
+//                        "   Vel: " + rightA.getSelectedSensorVelocity(0));
+                logMessage("Gyro Angle: " + gyro.getAngle());
             }
 
             @Override
             public void done() {
                 t.stop();
-                drive.stopMotor();
+                //drive.stopMotor();
             }
 
             @Override
@@ -165,6 +175,55 @@ public class DriveTrain extends Subsystem
             }
 
             private int velToCTREUnits(int vel) { return vel / 600 * 4096; }
+        };
+    }
+
+    public Command turnToAngle(double angle)
+    {
+        return new Command() {
+            DifferentialDrive drive = new DifferentialDrive(leftA, rightA);
+            PID pid;
+            double error;
+
+            @Override
+            public boolean isFinished() {
+                return false;
+            }
+
+            @Override
+            public void start()
+            {
+                Preferences pref = Preferences.getInstance();
+                gyro.reset();
+                leftA.set(ControlMode.PercentOutput, 0);
+                rightA.set(ControlMode.PercentOutput, 0);
+
+                pid = new PID(pref.getDouble("TurnP", 0), pref.getDouble("TurnI", 0));
+            }
+
+            @Override
+            public void update()
+            {
+                error = (Math.abs(gyro.getAngle()) > 360) ? gyro.getAngle() % 360 : gyro.getAngle();
+                double out = pid.getOutput(error);
+                drive.tankDrive(out, -out);
+            }
+
+            @Override
+            public void done()
+            {
+                drive.stopMotor();
+            }
+
+            @Override
+            public void interrupt()
+            {
+                logError("Could not finish turning to angle");
+                done();
+            }
+
+            @Override
+            public String getName() { return "TurnToAngle[" + angle + "]"; }
         };
     }
 }

@@ -2,24 +2,32 @@ package org.team2851.util.motion;
 
 import org.team2851.util.motion.Point2D;
 
-public abstract class Path
+import java.util.*;
+
+public class Path
 {
-    private Point2D startPoint, endPoint;
+    private List<Point2D> points = new ArrayList<>();
+    private int currentIndex = 0;
 
-    public Path(Point2D startPoint, Point2D endPoint)
+    public void addPoint(Point2D point)
     {
-        this.startPoint = startPoint;
-        this.endPoint = endPoint;
+        points.add(point);
     }
-    public abstract double[][] getMotionProfile();
-    public abstract boolean isMotionProfile();
 
-    public double getAngle() { return startPoint.getAngle(endPoint); }
-    public double getDistance() { return startPoint.getDistance(endPoint); }
+    public Point2D getNextPoint() throws PathCompleteException
+    {
+        if (currentIndex >= points.size())
+        {
+            throw new PathCompleteException();
+        } else {
+            return points.get(currentIndex++);
+        }
+    }
 
-    public Point2D getEndPoint() { return endPoint; }
-    public Point2D getStartPoint() { return startPoint; }
+    public void reset()
+    {
+        currentIndex = 0;
+    }
 
-    @Override
-    public String toString() { return "Path { " + startPoint.toString() + "--> " + endPoint.toString() + " }"; }
+    class PathCompleteException extends Exception {}
 }
