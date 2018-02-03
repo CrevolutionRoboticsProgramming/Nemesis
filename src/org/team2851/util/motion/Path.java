@@ -28,6 +28,4 @@ public class Path
     {
         currentIndex = 0;
     }
-
-    class PathCompleteException extends Exception {}
 }
