@@ -1,5 +1,6 @@
 **/.idea
-**/dist
 **/build
-**/out
-Nemesis.iml
+**/.gradle
+*.iml
+Nemesis.ipr
+Nemesis.iws

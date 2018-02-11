@@ -1,0 +1,19 @@
+<Controller port="1" name="pilot">
+    <Button id="a" mode="raw"/>
+    <Button id="b" mode="raw"/>
+    <Button id="x" mode="raw"/>
+    <Button id="y" mode="raw"/>
+    <Button id="leftBumper" mode="raw"/>
+    <Button id="rightBumper" mode="raw"/>
+    <Button id="start" mode="raw"/>
+    <Button id="select" mode="raw"/>
+    <Button id="leftJoy" mode="raw"/>
+    <Button id="rightJoy" mode="raw"/>
+
+    <Axis id="leftX" mode="raw"/>
+    <Axis id="leftY" mode="inverted"/>
+    <Axis id="rightX" mode="raw"/>
+    <Axis id="rightY" mode="raw"/>
+    <Axis id="leftTrigger" mode="raw"/>
+    <Axis id="rightTrigger" mode="raw"/>
+</Controller>

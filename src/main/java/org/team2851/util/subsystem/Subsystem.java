@@ -102,4 +102,20 @@ public abstract class Subsystem extends Thread
 
     protected void logError(String message) { Logger.printerr("Subsystem [" + mName + "]: " + message); }
     protected void logMessage(String message) { Logger.println("Subsystem [" + mName + "]: " + message); }
+
+    public class DefaultCommand implements Command
+    {
+        @Override
+        public boolean isFinished() { return false; }
+        @Override
+        public void start() { }
+        @Override
+        public void update() { }
+        @Override
+        public void done() { }
+        @Override
+        public void interrupt() { }
+        @Override
+        public String getName() { return "Default"; }
+    }
 }

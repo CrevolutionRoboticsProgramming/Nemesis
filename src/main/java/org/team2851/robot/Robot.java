@@ -15,6 +15,7 @@ public class Robot extends CrevoRobot
         registerSubsystem(DriveTrain.getInstance());
         try {
             pilot = ConfigFile.getController("pilot.xml");
+            copilot = ConfigFile.getController("copilot.xml");
         } catch (ElementNotFoundException e) {
             Logger.printerr("Could not parse pilot controller");
             Subsystem.teleopEnabled = false;
