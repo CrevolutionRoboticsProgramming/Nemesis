@@ -12,6 +12,9 @@ public class Robot extends CrevoRobot
     public Robot()
     {
         registerSubsystem(DriveTrain.getInstance());
+        registerSubsystem(Lift.getInstance());
+        registerSubsystem(Intake.getInstance());
+
         try {
             pilot = ConfigFile.getController("pilot.xml");
             copilot = ConfigFile.getController("copilot.xml");

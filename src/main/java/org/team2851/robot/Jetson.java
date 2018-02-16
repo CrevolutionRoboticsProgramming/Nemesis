@@ -13,4 +13,14 @@ public class Jetson
         networkTableInstance = NetworkTableInstance.getDefault();
         networkTable = networkTableInstance.getTable("Jetson");
     }
+
+    double getDeltaAngle()
+    {
+        return networkTable.getEntry("deltaAngle").getDouble(0);
+    }
+
+    boolean isOnline()
+    {
+        return networkTable.getEntry("isOnline").getBoolean(false);
+    }
 }

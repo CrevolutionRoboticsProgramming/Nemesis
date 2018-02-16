@@ -77,8 +77,8 @@ public class ConfigFile
         {
             try {
                 if (element.getAttribute("p") != null) p = element.getAttribute("p").getDoubleValue();
-                if (element.getAttribute("") != null) i = element.getAttribute("i").getDoubleValue();
-                if (element.getAttribute("") != null) i = element.getAttribute("i").getDoubleValue();
+                if (element.getAttribute("i") != null) i = element.getAttribute("i").getDoubleValue();
+                if (element.getAttribute("d") != null) i = element.getAttribute("i").getDoubleValue();
             } catch (DataConversionException e) {
                 System.out.println("TalonSRX [" + name + "]: Failure to configure PID controller");
                 usePID = false;
