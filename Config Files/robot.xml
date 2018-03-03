@@ -1,8 +1,0 @@
-<Robot name="Nemesis">
-    <TalonSRX port="14" name="talonLeftA" isInverted="false"/>
-    <TalonSRX port="12" name="talonLeftB" isInverted="false"/>
-    <TalonSRX port="29" name="talonRightA" isInverted="false"/>
-    <TalonSRX port="6" name="talonRightB" isInverted="false"/>
-    <PID name="Trajectory PID" p="1" i="0.001"/>
-    <Double name="driveMult" value="1"/>
-</Robot>

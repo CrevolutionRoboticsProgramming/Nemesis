@@ -38,6 +38,7 @@ public class PID
                 break;
             }
             case PI: {
+//                System.out.println(error);
                 iState += error;
                 output = (error * p) + (iState * i);
                 break;

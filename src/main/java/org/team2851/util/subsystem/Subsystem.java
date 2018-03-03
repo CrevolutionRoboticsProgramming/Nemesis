@@ -2,6 +2,10 @@ package org.team2851.util.subsystem;
 
 import org.team2851.util.Logger;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
+// TODO: Investigate using TimerTask to fix update speed at 5ms. Check if Thread.sleep(5, 0) is actually ensuring constant dt.
 public abstract class Subsystem extends Thread
 {
     // Fields
@@ -29,7 +33,7 @@ public abstract class Subsystem extends Thread
 
     public synchronized void setCommand(Command command)
     {
-        if (!this.command.isFinished())
+        if (this.command != null && !this.command.isFinished())
             this.command.interrupt();
 
         hasInit = false;
@@ -39,23 +43,24 @@ public abstract class Subsystem extends Thread
 
     private synchronized void runCommand()
     {
-        if (!teleopEnabled && command.getName().equals("Teleop"))
-        {
-            logError("Teleop is disabled");
-            return;
-        }
-
-        if (isEnabled)
-        {
-            if (!hasInit) {
-                command.start();
-                hasInit = true;
+        if (command != null) {
+            if (!teleopEnabled && command.getName().equals("Teleop")) {
+                logError("Teleop is disabled");
+                return;
             }
 
-            if (!command.isFinished()) {
-                command.update();
-            } else {
-                command.done();
+            if (isEnabled) {
+                if (!hasInit) {
+                    command.start();
+                    hasInit = true;
+                }
+
+                if (!command.isFinished()) {
+                    command.update();
+                } else {
+                    command.done();
+                    command = null;
+                }
             }
         }
     }
@@ -67,7 +72,7 @@ public abstract class Subsystem extends Thread
         {
             runCommand();
             try {
-                Thread.sleep(0,1);
+                Thread.sleep(5,0);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -89,15 +94,7 @@ public abstract class Subsystem extends Thread
 
     public boolean isSubsystemActive()
     {
-        return !command.isFinished();
-    }
-
-    public void halt()
-    {
-        if (!command.isFinished())
-            command.interrupt();
-        isAlive = false;
-        Logger.println("Halting Subsystem: " + mName);
+        return !(command == null || command.isFinished());
     }
 
     protected void logError(String message) { Logger.printerr("Subsystem [" + mName + "]: " + message); }

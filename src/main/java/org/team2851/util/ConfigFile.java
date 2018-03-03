@@ -15,25 +15,16 @@ import java.util.List;
 
 public class ConfigFile
 {
-    /*
-     *  Singleton class that opens a configuration file at the directory defined in the RobotConstants class.
-     *
-     *  Public/Protected Methods:
-     *      getInstance(): Returns the static instance of ConfigFile
-     *      getRobotName() throws NullPointerException: Returns the name of the robot defined in <Robot name="">
-     *      getCANTalon(String name) throws ElementNotFoundException: Searches for the talon defined with the name
-     *          provided and configures a corresponding CANTalon object. Throws an ElementNotFoundException if the
-     *          element was not found in the config file or it could not be properly configured.
-     *      getController(String name) throws ElementNotFoundException: Takes a configFile name and creates a controller
-     *          based on the contents of the xml file
+
+    private static SAXBuilder saxBuilder = new SAXBuilder();
+    private static Document document;
+
+    private ConfigFile() {}
+
+    /**
+     * Imports robot.xml file. Necessary for other functions to work
      */
-
-    private SAXBuilder saxBuilder = new SAXBuilder();
-    private Document document;
-
-    private static ConfigFile sInstance = new ConfigFile();
-
-    private ConfigFile()
+    public static void readFile()
     {
         File file = new File(RobotConstants.getInstance().configFilePath + "robot.xml");
         try {
@@ -45,11 +36,19 @@ public class ConfigFile
         }
     }
 
-    public static ConfigFile getInstance() { return sInstance; }
+    /**
+     * @return The name of the robot
+     * @throws NullPointerException Thrown if the name attribute is not found in the robot tag
+     */
+    public static String getRobotName() throws NullPointerException { return document.getRootElement().getAttributeValue("name"); }
 
-    public String getRobotName() throws NullPointerException { return document.getRootElement().getAttributeValue("name"); }
-
-    public TalonSRX getTalonSRX(String name) throws ElementNotFoundException
+    /**
+     * Configures and returns a TalonSRX object based on a TalonSRX tag in robot.xml
+     * @param name The name of the tag
+     * @return TalonSRX object
+     * @throws ElementNotFoundException Thrown if the tag is not found in robot.xml
+     */
+    public static TalonSRX getTalonSRX(String name) throws ElementNotFoundException
     {
         TalonSRX talon = null;
         Element element = getElement("TalonSRX", name);
@@ -99,7 +98,13 @@ public class ConfigFile
         return talon;
     }
 
-    public WPI_TalonSRX getWPI_TalonSRX(String name) throws ElementNotFoundException
+    /**
+     * Configures and returns a WPI_TalonSRX object based on a TalonSRX tag in robot.xml
+     * @param name The name of the tag
+     * @return WPI_TalonSRX object
+     * @throws ElementNotFoundException Thrown if the tag is not found in robot.xml
+     */
+    public static WPI_TalonSRX getWPI_TalonSRX(String name) throws ElementNotFoundException
     {
         WPI_TalonSRX talon;
         Element e = getElement("TalonSRX", name);
@@ -145,24 +150,52 @@ public class ConfigFile
         return talon;
     }
 
-    public int getInt(String name) throws ElementNotFoundException, DataConversionException {
+    /**
+     * Returns integer constant from robot.xml
+     * @param name The name of the tag
+     * @return The integer value
+     * @throws ElementNotFoundException Thrown if the tag is not found in robot.xml
+     * @throws DataConversionException Thrown if the value attribute does not contain an integer
+     */
+    public static int getInt(String name) throws ElementNotFoundException, DataConversionException {
         Element element = getElement("Int", name);
         return element.getAttribute("value").getIntValue();
     }
 
-    public double getDouble(String name) throws ElementNotFoundException, DataConversionException
+    /**
+     * Returns double constant from robot.xml
+     * @param name The name of the tag
+     * @return The double value
+     * @throws ElementNotFoundException Thrown if the tag is not found in robot.xml
+     * @throws DataConversionException Thrown if the value attribute does not contain a double
+     */
+    public static double getDouble(String name) throws ElementNotFoundException, DataConversionException
     {
         Element element = getElement("Double", name);
         return element.getAttribute("value").getDoubleValue();
     }
 
-    public boolean getBoolean(String name) throws ElementNotFoundException, DataConversionException
+    /**
+     * Returns boolean constant from robot.xml
+     * @param name The name of the tag
+     * @return The boolean value
+     * @throws ElementNotFoundException Thrown if the tag is not found in robot.xml
+     * @throws DataConversionException Thrown if the value attribute does not contain a boolean
+     */
+    public static boolean getBoolean(String name) throws ElementNotFoundException, DataConversionException
     {
         Element element = getElement("Boolean", name);
         return element.getAttribute("value").getBooleanValue();
     }
 
-    public PID getPid(String name) throws ElementNotFoundException, DataConversionException
+    /**
+     * Returns a PID object configured by the tag
+     * @param name The name of the tag
+     * @return The PID object
+     * @throws ElementNotFoundException Thrown if the tag is not found in robot.xml
+     * @throws DataConversionException Thrown if the P, I, or D values are not doubles
+     */
+    public static PID getPid(String name) throws ElementNotFoundException, DataConversionException
     {
         double p, i, d;
         Element element = getElement("PID", name);
@@ -178,6 +211,12 @@ public class ConfigFile
         return new PID(p, i, d);
     }
 
+    /**
+     * Returns a configured controller object
+     * @param configFile The absolute path of the Controller ConfigFile
+     * @return Controller object
+     * @throws ElementNotFoundException Thrown if a required element is not found
+     */
     public static Controller getController(String configFile) throws ElementNotFoundException
     {
         File file = new File(RobotConstants.getInstance().configFilePath + configFile);
@@ -387,7 +426,7 @@ public class ConfigFile
         return controller;
     }
     // TODO: [Change]: Added tag filter and removed root element argument
-    private Element getElement(String name, String id) throws ElementNotFoundException
+    private static Element getElement(String name, String id) throws ElementNotFoundException
     {
         List<Element> elements = document.getRootElement().getChildren();
         for (Element e : elements)

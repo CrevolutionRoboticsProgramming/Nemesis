@@ -1,0 +1,13 @@
+<Robot name="Nemesis">
+    <TalonSRX port="6" name="talonLeftA" isInverted="false"/>
+    <TalonSRX port="4" name="talonLeftB" isInverted="false"/>
+    <TalonSRX port="17" name="talonRightA" isInverted="false"/>
+    <TalonSRX port="10" name="talonRightB" isInverted="false"/>
+    <TalonSRX port="29" name="talonLift" isInverted="false"/>
+    <TalonSRX port="2" name="IntakeA" isInverted="false"/>
+    <TalonSRX port="14" name="IntakeB" isInverted="false"/>
+    <PID name="Trajectory PID" p="0.2" i="0.001"/>
+    <PID name="Turn PID" p="0.09" i="0.0002"/>
+    <Double name="turnMult" value="0.31"/>
+    <Double name="driveMult" value="1"/>
+</Robot>

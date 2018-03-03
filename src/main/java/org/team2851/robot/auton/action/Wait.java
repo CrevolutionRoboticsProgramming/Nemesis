@@ -5,8 +5,8 @@ import org.team2851.util.auton.Action;
 
 public class Wait implements Action
 {
-    boolean isFinished = false;
-    double endTime, time;
+    private boolean isFinished = false;
+    private double endTime, time;
 
     public Wait(double time) { this.time = time; }
 

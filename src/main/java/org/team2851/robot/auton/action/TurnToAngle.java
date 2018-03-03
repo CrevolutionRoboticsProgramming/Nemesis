@@ -1,17 +1,15 @@
 package org.team2851.robot.auton.action;
 
-import edu.wpi.first.wpilibj.Timer;
 import org.team2851.robot.DriveTrain;
 import org.team2851.util.auton.Action;
 
-
-public class DriveDistance implements Action
+public class TurnToAngle implements Action
 {
+    private double angle;
     private DriveTrain driveTrain = DriveTrain.getInstance();
-    private double distance;
     private boolean isFinished = false;
 
-    public DriveDistance(double distance) { this.distance = distance; }
+    public TurnToAngle(double angle) { this.angle = angle; }
 
     @Override
     public boolean isFinished() {
@@ -19,21 +17,16 @@ public class DriveDistance implements Action
     }
 
     @Override
-    public void update()
-    {
+    public void update() {
         if (!driveTrain.isSubsystemActive()) isFinished = true;
     }
 
     @Override
     public void done() {
-
     }
 
     @Override
     public void start() {
-        driveTrain.setCommand(driveTrain.driveDistance(distance));
-        Timer t = new Timer();
-        t.start();
-        while (t.get() < 0.05);
+        driveTrain.setCommand(driveTrain.turnToAngle(angle));
     }
 }

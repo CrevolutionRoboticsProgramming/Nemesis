@@ -1,4 +1,5 @@
 package org.team2851.robot;
+import org.team2851.robot.auton.TurnToAngleAuton;
 import org.team2851.util.*;
 import org.team2851.util.motion.Point2D;
 import org.team2851.util.subsystem.Subsystem;
@@ -9,11 +10,12 @@ public class Robot extends CrevoRobot
     private static Point2D currentPoint;
     private static double currentAngle; // Field-Centric
 
-    public Robot()
-    {
-        registerSubsystem(DriveTrain.getInstance());
+    public Robot() {
+        ConfigFile.readFile();
+//        registerSubsystem(DriveTrain.getInstance());
         registerSubsystem(Lift.getInstance());
         registerSubsystem(Intake.getInstance());
+        registerAuton(new TurnToAngleAuton());
 
         try {
             pilot = ConfigFile.getController("pilot.xml");

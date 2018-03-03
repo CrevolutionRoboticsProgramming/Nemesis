@@ -20,17 +20,16 @@ public class Intake extends Subsystem
 
     @Override
     public void init() {
-        ConfigFile cf = ConfigFile.getInstance();
         try {
-            talonA = cf.getTalonSRX("IntakeA");
-            talonB = cf.getTalonSRX("IntakeB");
+            talonA = ConfigFile.getTalonSRX("IntakeA");
+            talonB = ConfigFile.getTalonSRX("IntakeB");
         } catch (ElementNotFoundException e) {
             isEnabled = false;
             logError("Intake could not initialize talons. Disabling...");
             return;
         }
 
-        controller = Robot.copilot;
+        controller = Robot.pilot;
     }
 
     @Override
