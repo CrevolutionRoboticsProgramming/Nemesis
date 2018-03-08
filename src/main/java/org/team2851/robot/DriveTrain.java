@@ -31,21 +31,12 @@ public class DriveTrain extends Subsystem
     private WPI_TalonSRX leftA, leftB, rightA, rightB;
     private ADXRS450_Gyro gyro;
 
-    // Trajectory
-    private double timeStep = DetermineStep.timeStep;
-    private double maxVel = 1.7, maxAccel = 2.0, maxJerk = 60; // (m/s, m/s/s, m/s/s/s)
-    Trajectory.Config config = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_HIGH, 0.003, 1.5, 2.0, 60.0);
-    Trajectory trajectory;
-    TankModifier modifier;
-    EncoderFollower left, right;
-
     // Values
-    private double driveMult;
     private double driveWidth = 0.75;
 
     private File csv;
     private FileOutputStream fos;
-    private boolean useFile = false;
+    private boolean useFile = true;
 
     @Override
     public void init()
@@ -56,50 +47,39 @@ public class DriveTrain extends Subsystem
             useFile = true;
         } catch (FileNotFoundException e) { }
         Preferences.getInstance().putBoolean("IsTank", false);
+        Preferences.getInstance().putDouble("TurnMultA", 1);
 
-//        try {
-//
-//            leftA = ConfigFile.getWPI_TalonSRX("talonLeftA");
-//            leftB = ConfigFile.getWPI_TalonSRX("talonLeftB");
-//            rightA = ConfigFile.getWPI_TalonSRX("talonRightA");
-//            rightB = ConfigFile.getWPI_TalonSRX("talonRightB");
-//
-//            leftA.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 0);
-//            rightA.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 0);
-//            leftB.set(ControlMode.Follower, leftA.getDeviceID());
-//            rightB.set(ControlMode.Follower, rightA.getDeviceID());
-//
-//            leftA.configNominalOutputForward(0, 0);
-//            leftA.configNominalOutputReverse(0, 0);
-//            leftA.configPeakOutputForward(1, 0);
-//            leftA.configPeakOutputReverse(-1, 0);
-//            leftA.setSelectedSensorPosition(0, 0, 0);
-//
-//            rightA.configNominalOutputForward(0, 0);
-//            rightA.configNominalOutputReverse(0, 0);
-//            rightA.configPeakOutputForward(1, 0);
-//            rightA.configPeakOutputReverse(-1, 0);
-//
-//            leftA.setSelectedSensorPosition(0, 0, 0);
-//            rightA.setSelectedSensorPosition(0 ,0, 0);
-//
-//            leftA.setSensorPhase(true);
-//
-////            rightA.setInverted(true);
-////            rightB.setInverted(true);
-//
-//            driveMult = ConfigFile.getDouble("driveMult");
-//        } catch (ElementNotFoundException e) {
-//            Logger.printerr("Subsystem [DriveTrain]: Could not instantiate motor controllers!");
-//            isEnabled = false;
-//        } catch (DataConversionException ee) {
-//            logError("Could not convert driveMult");
-//            driveMult = 1;
-//        }
-        leftA = new WPI_TalonSRX(28);
-        leftB = new WPI_TalonSRX(23);
-        rightA = new WPI_TalonSRX(19);
-        rightB = new WPI_TalonSRX(2);
+        try {
+
+            leftA = ConfigFile.getWPI_TalonSRX("talonLeftA");
+            leftB = ConfigFile.getWPI_TalonSRX("talonLeftB");
+            rightA = ConfigFile.getWPI_TalonSRX("talonRightA");
+            rightB = ConfigFile.getWPI_TalonSRX("talonRightB");
+
+            leftA.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 0);
+            rightA.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 0);
+            leftB.set(ControlMode.Follower, leftA.getDeviceID());
+            rightB.set(ControlMode.Follower, rightA.getDeviceID());
+
+            leftA.configNominalOutputForward(0, 0);
+            leftA.configNominalOutputReverse(0, 0);
+            leftA.configPeakOutputForward(1, 0);
+            leftA.configPeakOutputReverse(-1, 0);
+            leftA.setSelectedSensorPosition(0, 0, 0);
+
+            rightA.configNominalOutputForward(0, 0);
+            rightA.configNominalOutputReverse(0, 0);
+            rightA.configPeakOutputForward(1, 0);
+            rightA.configPeakOutputReverse(-1, 0);
+
+            leftA.setSelectedSensorPosition(0, 0, 0);
+            rightA.setSelectedSensorPosition(0 ,0, 0);
+
+            leftA.setSensorPhase(true);
+        } catch (ElementNotFoundException e) {
+            Logger.printerr("Subsystem [DriveTrain]: Could not instantiate motor controllers!");
+            isEnabled = false;
+        }
 
         leftB.set(ControlMode.Follower, leftA.getDeviceID());
         rightB.set(ControlMode.Follower, rightA.getDeviceID());
@@ -121,7 +101,7 @@ public class DriveTrain extends Subsystem
             Controller c = Robot.pilot;
             Timer t = new Timer();
             boolean isTank = false;
-            double lastTime = 0;
+            double turnMult, deadband = 0.15;
 
             @Override
             public boolean isFinished() { return false; }
@@ -129,36 +109,33 @@ public class DriveTrain extends Subsystem
             @Override
             public void start()
             {
-                t.start();
+                reset();
                 leftA.set(ControlMode.PercentOutput, 0);
                 rightA.set(ControlMode.PercentOutput, 0);
                 isTank = Preferences.getInstance().getBoolean("IsTank", false);
+                turnMult = Preferences.getInstance().getDouble("TurnMultA", 1);
 
-                leftA.configOpenloopRamp(0, 0);
-                rightA.configOpenloopRamp(0, 0);
+                drive.setDeadband(deadband);
             }
 
             @Override
             public void update()
             {
                 leftA.setSafetyEnabled(false);
+                leftB.setSafetyEnabled(false);
                 rightA.setSafetyEnabled(false);
-                leftB.set(ControlMode.Follower, leftA.getDeviceID());
-                rightB.set(ControlMode.Follower, rightA.getDeviceID());
-                if (!isTank) drive.curvatureDrive(c.leftY.getValue(), c.rightX.getValue() * -0.7, true);
-                else drive.tankDrive(c.leftY.getValue() * driveMult, c.rightY.getValue());
-                if (lastTime > 0)
-                {
-                    updateCSV(Timer.getFPGATimestamp() - lastTime, leftA.getSelectedSensorPosition(0), leftA.getSelectedSensorVelocity(0));
-                    lastTime = Timer.getFPGATimestamp();
-                } else {
-                    lastTime = Timer.getFPGATimestamp();
-                }
+                rightB.setSafetyEnabled(false);
+
+                if (isTank) drive.tankDrive(c.leftY.getValue(), c.rightY.getValue());
+                // Quickturn is enabled if the throttle value is below the set deadband (Allows for zero point turns)
+                else drive.curvatureDrive(c.leftY.getValue(), c.rightX.getValue() * -turnMult, /*Math.abs(c.leftY.getValue()) < deadband*/ true);
+
+                System.out.println("Left Encoder: " + leftA.getSelectedSensorPosition(0) + " || Right Encoder: " + rightA.getSelectedSensorPosition(0));
             }
 
             @Override
             public void done() {
-                t.stop();
+                reset();
                 drive.stopMotor();
             }
 
@@ -176,40 +153,48 @@ public class DriveTrain extends Subsystem
     {
         return new Command() {
             boolean isFinished = false;
+            final int CPR = 360; // Counts per rotation (The number of etches on an encoder disk). Multiply by 4 for quadrature encoder.
+            final double WHEEL_DIAMETER = 0.5; // The wheel diameter in feet
+            int iteration = 0;
             @Override
             public boolean isFinished() { return isFinished; }
 
             @Override
             public void start()
             {
-                reset();
+                // Configures kP and kI values for the left and right talons.
+                // TODO: Set max velocity and max integral accumulator
                 leftA.config_kP(0, Preferences.getInstance().getDouble("P", 0), 0);
-//                leftA.config_kI(0, Preferences.getInstance().getDouble("I", 0), 0);
-                leftA.configClosedloopRamp(1, 0);
-                leftA.configOpenloopRamp(1, 0);
+                leftA.config_kI(0, Preferences.getInstance().getDouble("I", 0), 0);
 
-                rightA.config_kP(0, Preferences.getInstance().getDouble("p", 0), 0);
-//                rightA.config_kI(0, Preferences.getInstance().getDouble("I", 0), 0);
-                rightA.configClosedloopRamp(1, 0);
-                rightA.configOpenloopRamp(1, 0);
+                rightA.config_kP(0, Preferences.getInstance().getDouble("P", 0), 0);
+                rightA.config_kI(0, Preferences.getInstance().getDouble("I", 0), 0);
 
-                logMessage("Initial Encoder Pos: " + leftA.getSelectedSensorPosition(0));
-                logMessage("Target Position: " + (distance * 1440) / (0.15 * Math.PI));
+                leftA.setSelectedSensorPosition(0, 0, 0);
+                rightA.setSelectedSensorPosition(0, 0, 0);
+
+
+                System.out.println("Initial Encoder Position: [Left: " + leftA.getSelectedSensorPosition(0) + "] [Right: " + rightA.getSelectedSensorPosition(0)+ "]");
+                System.out.println("Target Encoder Position: " + Integer.toString((int)((distance * CPR * 4) / (WHEEL_DIAMETER * Math.PI))));
             }
 
             @Override
             public void update()
             {
-                leftA.set(ControlMode.Position, (distance * 1440) / (0.15 * Math.PI));
+                if (iteration % 20 == 0) System.out.println("Current Left Encoder Position/Error: [" + leftA.getSelectedSensorPosition(0) + ", " + leftA.getClosedLoopError(0) + "]");
+                leftA.set(ControlMode.Position, (int)((distance * CPR * 4) / (WHEEL_DIAMETER * Math.PI)));
                 rightA.set(ControlMode.PercentOutput, -leftA.getMotorOutputPercent());
-                logMessage("Error: " + leftA.getClosedLoopError(0));
-                Preferences.getInstance().putDouble("Error", leftA.getClosedLoopError(0));
+//                logMessage("Error: " + leftA.getClosedLoopError(0));
+//                Preferences.getInstance().putDouble("Error", leftA.getClosedLoopError(0));
                 isFinished = Math.abs(leftA.getClosedLoopError(0)) < 200;
+                iteration++;
             }
 
             @Override
-            public void done() {
+            public void done()
+            {
                 leftA.set(ControlMode.PercentOutput, 0);
+                rightA.set(ControlMode.PercentOutput, 0);
             }
 
             @Override
@@ -311,72 +296,6 @@ public class DriveTrain extends Subsystem
         };
     }
 
-    // TODO: Figure htf this works!?
-
-    public Command followTrajectory(Waypoint[] waypoints)
-    {
-        return new Command() {
-            @Override
-            public boolean isFinished() {
-                if (left != null && right != null) {
-                    //System.out.println(left.isFinished() && right.isFinished());
-                    return left.isFinished() && right.isFinished();
-                }
-                else
-                    return false;
-            }
-
-            @Override
-            public void start() {
-                PID pid = new PID(Preferences.getInstance().getDouble("P", 0), Preferences.getInstance().getDouble("I", 0));
-                trajectory = Pathfinder.generate(waypoints, config);
-                modifier = new TankModifier(trajectory);
-                modifier.modify(driveWidth);
-                left = new EncoderFollower(modifier.getLeftTrajectory());
-                right = new EncoderFollower(modifier.getRightTrajectory());
-                left.configureEncoder(leftA.getSelectedSensorPosition(0), 360, 0.13);
-                left.configurePIDVA(pid.getP(), 0, 0, 1 / maxVel, 0);
-                right.configureEncoder(rightA.getSelectedSensorPosition(0), 360, 0.13);
-                right.configurePIDVA(pid.getP(), 0, 0, 1 / maxVel, 0);
-                gyro.reset();
-            }
-
-            @Override
-            public void update()
-            {
-                double l = left.calculate(leftA.getSelectedSensorPosition(0));
-                double r = right.calculate(rightA.getSelectedSensorPosition(0));
-
-                double gyro_head = gyro.getAngle();
-                double head = Pathfinder.r2d(left.getHeading());
-
-                double diff = Pathfinder.boundHalfDegrees(head - gyro_head);
-                double turn = 0.75 * (-1/80) * diff;
-
-                System.out.println("Left: " + l + "Right: " + rightA.getSelectedSensorPosition(0));
-
-                leftA.set(ControlMode.PercentOutput, l + turn);
-                rightA.set(ControlMode.PercentOutput, -(r + turn));
-            }
-
-            @Override
-            public void done() {
-                leftA.set(0);
-                rightA.set(0);
-            }
-
-            @Override
-            public void interrupt() {
-                done();
-            }
-
-            @Override
-            public String getName() {
-                return "Follow Path";
-            }
-        };
-    }
-
     private void reset()
     {
         leftA.setSelectedSensorPosition(0, 0, 0);
@@ -386,10 +305,11 @@ public class DriveTrain extends Subsystem
         rightA.set(ControlMode.PercentOutput, 0);
     }
 
-    private void updateCSV(double dt, double pos, double vel)
+    private void updateCSV(double dt, double vel, double accel, double jerk)
     {
         if (!useFile) return;
-        String str = dt + "," + pos + "," + vel + ",\n";
+        String str = dt + "," + vel + "," + accel + "," + jerk + ",\n";
+        System.out.println(str);
         char[] chars = str.toCharArray();
         byte[] out = new byte[chars.length];
         for (int i = 0; i < out.length; i++) out[i] = (byte)chars[i];

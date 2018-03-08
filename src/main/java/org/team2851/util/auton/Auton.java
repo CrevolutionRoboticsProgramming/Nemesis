@@ -1,5 +1,7 @@
 package org.team2851.util.auton;
 
+import edu.wpi.first.wpilibj.Timer;
+
 public abstract class Auton {
     private String name = "NULL Auton";
     protected Auton(String name)
@@ -40,8 +42,10 @@ public abstract class Auton {
     }
 
     public void runAction(Action action) throws AutonEndedException {
+        Timer t = new Timer();
         isAlive();
         action.start();
+        while (!t.hasPeriodPassed(0.01)); // TODO: DETERMINE IF DELAY HELPS
 
         while (isAlive() && !action.isFinished())
         {

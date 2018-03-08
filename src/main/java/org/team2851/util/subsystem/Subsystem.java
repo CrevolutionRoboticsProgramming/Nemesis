@@ -5,7 +5,6 @@ import org.team2851.util.Logger;
 import java.util.Timer;
 import java.util.TimerTask;
 
-// TODO: Investigate using TimerTask to fix update speed at 5ms. Check if Thread.sleep(5, 0) is actually ensuring constant dt.
 public abstract class Subsystem extends Thread
 {
     // Fields
@@ -14,6 +13,7 @@ public abstract class Subsystem extends Thread
     protected boolean isAlive = false, hasInit = false, isEnabled = true; // Include is alive in any nested while loops
     public static boolean teleopEnabled = true; // Set to false if the controllers were not properly configured
     private Command command = getDefaultCommand();
+    protected boolean useDefaultAlways = false;
 
     public String toString()
     {
@@ -33,8 +33,7 @@ public abstract class Subsystem extends Thread
 
     public synchronized void setCommand(Command command)
     {
-        if (this.command != null && !this.command.isFinished())
-            this.command.interrupt();
+        if (this.command != null && !this.command.isFinished()) this.command.interrupt();
 
         hasInit = false;
         this.command = command;
@@ -53,6 +52,11 @@ public abstract class Subsystem extends Thread
                 if (!hasInit) {
                     command.start();
                     hasInit = true;
+                    try {
+                        Thread.sleep(5, 0);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 if (!command.isFinished()) {
@@ -62,6 +66,9 @@ public abstract class Subsystem extends Thread
                     command = null;
                 }
             }
+        } else if (useDefaultAlways)
+        {
+            command = getDefaultCommand();
         }
     }
 

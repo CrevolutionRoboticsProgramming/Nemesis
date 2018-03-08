@@ -1,4 +1,4 @@
-<Controller port="0" name="pilot">
+<Controller port="1" name="pilot">
     <Button id="a" mode="raw"/>
     <Button id="b" mode="raw"/>
     <Button id="x" mode="raw"/>

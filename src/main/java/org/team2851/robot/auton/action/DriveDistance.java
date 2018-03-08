@@ -21,7 +21,7 @@ public class DriveDistance implements Action
     @Override
     public void update()
     {
-        if (!driveTrain.isSubsystemActive()) isFinished = true;
+        if (!driveTrain.isSubsystemActive()) isFinished = false;
     }
 
     @Override

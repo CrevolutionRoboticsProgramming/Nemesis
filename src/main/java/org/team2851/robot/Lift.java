@@ -17,6 +17,7 @@ public class Lift extends Subsystem
     private static Lift instance = new Lift();
     public static Lift getInstance() { return instance; }
     private Lift() { super("Lift"); }
+    private double currentPower = 0.0D;
 
     public enum LiftPosition
     {
@@ -55,10 +56,46 @@ public class Lift extends Subsystem
             isEnabled = false;
             logError("Could not find talon element. Disabling subsystem.");
         }
+
+        useDefaultAlways = true;
     }
 
     @Override
-    public Command getDefaultCommand() { return new DefaultCommand(); }
+    public Command getDefaultCommand()
+    {
+        return new Command()
+        {
+            @Override
+            public boolean isFinished() {
+                return false;
+            }
+
+            @Override
+            public void start() {
+
+            }
+
+            @Override
+            public void update() {
+                talon.set(ControlMode.PercentOutput, currentPower);
+            }
+
+            @Override
+            public void done() {
+                talon.set(ControlMode.PercentOutput, 0);
+            }
+
+            @Override
+            public void interrupt() {
+
+            }
+
+            @Override
+            public String getName() {
+                return "Default";
+            }
+        };
+    }
 
     @Override
     public Command getTeleopCommand() {
@@ -67,7 +104,7 @@ public class Lift extends Subsystem
             // a : up
             // b : down
             // temp (time) : 0.5 seconds
-            private Controller c = Robot.pilot;
+            private Controller c = Robot.copilot;
             private LatchedBoolean a = new LatchedBoolean();
             private LatchedBoolean b = new LatchedBoolean();
             private Timer t = new Timer();
@@ -87,10 +124,9 @@ public class Lift extends Subsystem
             @Override
             public void update()
             {
-                if (c.a.getState()) talon.set(ControlMode.PercentOutput, .8);
-                else if (c.b.getState()) talon.set(ControlMode.PercentOutput, -.15);
-                else if (c.y.getState()) talon.set(ControlMode.PercentOutput, -0.05);
-                else if (c.x.getState()) talon.set(ControlMode.PercentOutput, 0.07);
+                if (c.a.getState()) talon.set(ControlMode.PercentOutput, .9);
+                else if (c.b.getState()) talon.set(ControlMode.PercentOutput, -.5);
+                else if (c.x.getState()) talon.set(ControlMode.PercentOutput, 0.15); // Stalls motor (Keeps lift up)
                 else talon.set(ControlMode.PercentOutput, 0);
 //                if (c.leftTrigger.getValue() > 0.3)
 //                {
@@ -145,6 +181,7 @@ public class Lift extends Subsystem
             {
 //                talon.set(ControlMode.PercentOutput, 0);
 //                t.stop();
+                currentPower = 0;
             }
 
             @Override
@@ -188,6 +225,47 @@ public class Lift extends Subsystem
             @Override
             public String getName() {
                 return "SetPosition[" + position.toString() + "]";
+            }
+        };
+    }
+
+    public Command liftForTime(double time, boolean goingDown)
+    {
+        return new Command() {
+            Timer t = new Timer();
+            double power;
+            @Override
+            public boolean isFinished() {
+                return false;
+            }
+
+            @Override
+            public void start()
+            {
+                t.start();
+                power = (goingDown) ? -0.6 : 0.8;
+            }
+
+            @Override
+            public void update()
+            {
+                if (t.get() < time) talon.set(ControlMode.PercentOutput, power);
+            }
+
+            @Override
+            public void done() {
+                talon.set(ControlMode.PercentOutput, 0.15);
+                currentPower = (goingDown) ? 0 : 0.15;
+            }
+
+            @Override
+            public void interrupt() {
+                currentPower = 0;
+            }
+
+            @Override
+            public String getName() {
+                return "LiftForTime[" + time + "]";
             }
         };
     }

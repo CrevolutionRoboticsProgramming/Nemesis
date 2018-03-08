@@ -1,13 +1,15 @@
 package org.team2851.robot.auton.action;
 
+import edu.wpi.first.wpilibj.Timer;
 import org.team2851.robot.Intake;
 import org.team2851.util.Logger;
 import org.team2851.util.auton.Action;
 
 public class OuttakeCube implements Action
 {
+    Intake intake = Intake.getInstance();
     @Override
-    public boolean isFinished() { return true; }
+    public boolean isFinished() { return intake.isSubsystemActive(); }
 
     @Override
     public void update()
@@ -18,13 +20,13 @@ public class OuttakeCube implements Action
     @Override
     public void done()
     {
-        Logger.println("Finished Outtaking Cube");
+
     }
 
     @Override
     public void start()
     {
         Logger.println("Outtaking Cube");
-//        Intake.getInstance().setCommand(Intake.getInstance().outtakeCube());
+        intake.setCommand(intake.manipulateCube(Intake.IntakeDirection.OUTTAKE));
     }
 }
