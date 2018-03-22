@@ -12,11 +12,12 @@ public class MoveLift implements Action
     public MoveLift(double time, boolean goingDown)
     {
         this.time = time;
-        this.goingDown = false;
+        this.goingDown = goingDown;
     }
 
     @Override
     public boolean isFinished() {
+        System.out.println("IsDone: " + !lift.isSubsystemActive());
         return !lift.isSubsystemActive();
     }
 
@@ -27,7 +28,7 @@ public class MoveLift implements Action
 
     @Override
     public void done() {
-
+        System.out.println("Moved Lift");
     }
 
     @Override

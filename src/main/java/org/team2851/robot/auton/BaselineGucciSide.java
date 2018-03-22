@@ -1,10 +1,10 @@
 package org.team2851.robot.auton;
 
-import org.team2851.robot.auton.action.DriveDistance;
+import org.team2851.robot.auton.action.MoveLift;
+import org.team2851.robot.auton.action.TimedDrive;
 import org.team2851.robot.auton.action.Wait;
 import org.team2851.util.auton.Auton;
 import org.team2851.util.auton.AutonEndedException;
-import org.team2851.util.auton.Side;
 
 public class BaselineGucciSide extends Auton
 {
@@ -13,7 +13,8 @@ public class BaselineGucciSide extends Auton
     @Override
     protected void routine() throws AutonEndedException
     {
-        runAction(new Wait(0));
-        runAction(new DriveDistance(8));
+        runAction(new MoveLift(1, false));
+        runAction(new Wait(1));
+        runAction(new TimedDrive(4, 0.5));
     }
 }

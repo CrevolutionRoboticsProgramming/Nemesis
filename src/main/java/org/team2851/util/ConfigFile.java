@@ -26,7 +26,7 @@ public class ConfigFile
      */
     public static void readFile()
     {
-        File file = new File(RobotConstants.getInstance().configFilePath + "robot.xml");
+        File file = new File("/home/lvuser/config/robot.xml");
         try {
             document = saxBuilder.build(file);
         } catch (JDOMException e) {
@@ -219,7 +219,7 @@ public class ConfigFile
      */
     public static Controller getController(String configFile) throws ElementNotFoundException
     {
-        File file = new File(RobotConstants.getInstance().configFilePath + configFile);
+        File file = new File("/home/lvuser/config/" + configFile);
         Document doc = null;
         try {
             doc = new SAXBuilder().build(file);

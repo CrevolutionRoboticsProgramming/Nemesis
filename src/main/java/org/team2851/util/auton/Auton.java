@@ -42,10 +42,8 @@ public abstract class Auton {
     }
 
     public void runAction(Action action) throws AutonEndedException {
-        Timer t = new Timer();
         isAlive();
         action.start();
-        while (!t.hasPeriodPassed(0.01)); // TODO: DETERMINE IF DELAY HELPS
 
         while (isAlive() && !action.isFinished())
         {

@@ -2,14 +2,11 @@ package org.team2851.util.subsystem;
 
 import org.team2851.util.Logger;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 public abstract class Subsystem extends Thread
 {
     // Fields
     private Thread mThread;
-    private String mName = "Unknown Subsystem";
+    private String mName;
     protected boolean isAlive = false, hasInit = false, isEnabled = true; // Include is alive in any nested while loops
     public static boolean teleopEnabled = true; // Set to false if the controllers were not properly configured
     private Command command = getDefaultCommand();
@@ -31,6 +28,10 @@ public abstract class Subsystem extends Thread
         mName = name;
     }
 
+    /**
+     * Sets the current Command of the subsystem. Will interrupt current Command.
+     * @param command The new command
+     */
     public synchronized void setCommand(Command command)
     {
         if (this.command != null && !this.command.isFinished()) this.command.interrupt();
@@ -66,9 +67,6 @@ public abstract class Subsystem extends Thread
                     command = null;
                 }
             }
-        } else if (useDefaultAlways)
-        {
-            command = getDefaultCommand();
         }
     }
 

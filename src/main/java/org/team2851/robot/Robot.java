@@ -1,6 +1,5 @@
 package org.team2851.robot;
-import org.team2851.robot.auton.BaselineGucciSide;
-import org.team2851.robot.auton.Left;
+import org.team2851.robot.auton.*;
 import org.team2851.util.*;
 import org.team2851.util.subsystem.Subsystem;
 
@@ -15,7 +14,10 @@ public class Robot extends CrevoRobot
         registerSubsystem(Intake.getInstance());
 
         registerAuton(new Left());
+        registerAuton(new Right());
         registerAuton(new BaselineGucciSide());
+        registerAuton(new Center());
+        registerAuton(new TestAuton());
 
         try {
             pilot = ConfigFile.getController("pilot.xml");

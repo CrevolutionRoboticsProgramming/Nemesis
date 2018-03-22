@@ -1,18 +1,16 @@
 package org.team2851.robot;
 
+import com.ctre.phoenix.motion.SetValueMotionProfile;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.Trajectory;
-import jaci.pathfinder.Waypoint;
-import jaci.pathfinder.followers.EncoderFollower;
-import jaci.pathfinder.modifiers.TankModifier;
 import org.jdom2.DataConversionException;
-import org.team2851.robot.auton.action.DetermineStep;
 import org.team2851.util.*;
+import org.team2851.util.motion.MotionProfile;
+import org.team2851.util.motion.MotionProfileExecutor;
 import org.team2851.util.subsystem.Command;
 import org.team2851.util.subsystem.Subsystem;
 
@@ -20,6 +18,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Vector;
 
 public class DriveTrain extends Subsystem
 {
@@ -37,6 +36,8 @@ public class DriveTrain extends Subsystem
     private File csv;
     private FileOutputStream fos;
     private boolean useFile = true;
+
+    private static final double wheelDiameter = 0.5;
 
     @Override
     public void init()
@@ -101,7 +102,7 @@ public class DriveTrain extends Subsystem
             Controller c = Robot.pilot;
             Timer t = new Timer();
             boolean isTank = false;
-            double turnMult, deadband = 0.15;
+            double turnMult, mult, deadband = 0.15;
 
             @Override
             public boolean isFinished() { return false; }
@@ -113,7 +114,7 @@ public class DriveTrain extends Subsystem
                 leftA.set(ControlMode.PercentOutput, 0);
                 rightA.set(ControlMode.PercentOutput, 0);
                 isTank = Preferences.getInstance().getBoolean("IsTank", false);
-                turnMult = Preferences.getInstance().getDouble("TurnMultA", 1);
+                turnMult = Preferences.getInstance().getDouble("TurnMultA", 0.75);
 
                 drive.setDeadband(deadband);
             }
@@ -125,12 +126,13 @@ public class DriveTrain extends Subsystem
                 leftB.setSafetyEnabled(false);
                 rightA.setSafetyEnabled(false);
                 rightB.setSafetyEnabled(false);
+                drive.setSafetyEnabled(false);
+                mult = (c.leftBumper.getState()) ? 0.5 : 1;
+                turnMult = (c.leftBumper.getState()) ? 0.4 : 0.75;
 
                 if (isTank) drive.tankDrive(c.leftY.getValue(), c.rightY.getValue());
                 // Quickturn is enabled if the throttle value is below the set deadband (Allows for zero point turns)
-                else drive.curvatureDrive(c.leftY.getValue(), c.rightX.getValue() * -turnMult, /*Math.abs(c.leftY.getValue()) < deadband*/ true);
-
-                System.out.println("Left Encoder: " + leftA.getSelectedSensorPosition(0) + " || Right Encoder: " + rightA.getSelectedSensorPosition(0));
+                else drive.curvatureDrive(c.leftY.getValue() * mult, c.rightX.getValue() * -turnMult, true);
             }
 
             @Override
@@ -146,55 +148,29 @@ public class DriveTrain extends Subsystem
         };
     }
 
-    /*
-     *  distance -> Distance in meters
-     */
-    public Command driveDistance(double distance)
+    public Command driveTime(double time, double leftPower, double rightPower)
     {
         return new Command() {
-            boolean isFinished = false;
-            final int CPR = 360; // Counts per rotation (The number of etches on an encoder disk). Multiply by 4 for quadrature encoder.
-            final double WHEEL_DIAMETER = 0.5; // The wheel diameter in feet
-            int iteration = 0;
+            Timer t = new Timer();
             @Override
-            public boolean isFinished() { return isFinished; }
-
-            @Override
-            public void start()
-            {
-                // Configures kP and kI values for the left and right talons.
-                // TODO: Set max velocity and max integral accumulator
-                leftA.config_kP(0, Preferences.getInstance().getDouble("P", 0), 0);
-                leftA.config_kI(0, Preferences.getInstance().getDouble("I", 0), 0);
-
-                rightA.config_kP(0, Preferences.getInstance().getDouble("P", 0), 0);
-                rightA.config_kI(0, Preferences.getInstance().getDouble("I", 0), 0);
-
-                leftA.setSelectedSensorPosition(0, 0, 0);
-                rightA.setSelectedSensorPosition(0, 0, 0);
-
-
-                System.out.println("Initial Encoder Position: [Left: " + leftA.getSelectedSensorPosition(0) + "] [Right: " + rightA.getSelectedSensorPosition(0)+ "]");
-                System.out.println("Target Encoder Position: " + Integer.toString((int)((distance * CPR * 4) / (WHEEL_DIAMETER * Math.PI))));
+            public boolean isFinished() {
+                return t.get() > time;
             }
 
             @Override
-            public void update()
-            {
-                if (iteration % 20 == 0) System.out.println("Current Left Encoder Position/Error: [" + leftA.getSelectedSensorPosition(0) + ", " + leftA.getClosedLoopError(0) + "]");
-                leftA.set(ControlMode.Position, (int)((distance * CPR * 4) / (WHEEL_DIAMETER * Math.PI)));
-                rightA.set(ControlMode.PercentOutput, -leftA.getMotorOutputPercent());
-//                logMessage("Error: " + leftA.getClosedLoopError(0));
-//                Preferences.getInstance().putDouble("Error", leftA.getClosedLoopError(0));
-                isFinished = Math.abs(leftA.getClosedLoopError(0)) < 200;
-                iteration++;
+            public void start() {
+                t.start();
             }
 
             @Override
-            public void done()
-            {
-                leftA.set(ControlMode.PercentOutput, 0);
-                rightA.set(ControlMode.PercentOutput, 0);
+            public void update() {
+                leftA.set(ControlMode.PercentOutput, leftPower);
+                rightA.set(ControlMode.PercentOutput, rightPower);
+            }
+
+            @Override
+            public void done() {
+                reset();
             }
 
             @Override
@@ -204,7 +180,7 @@ public class DriveTrain extends Subsystem
 
             @Override
             public String getName() {
-                return "DriveDistance(" + Double.toString(distance) + ")";
+                return "DriveTime[" + time + "]";
             }
         };
     }
@@ -232,6 +208,7 @@ public class DriveTrain extends Subsystem
                 rightA.set(ControlMode.PercentOutput, 0);
 
 //                pid = new PID(Preferences.getInstance().getDouble("P", 0), Preferences.getInstance().getDouble("I", 0));
+
                 try {
                     pid = ConfigFile.getPid("Turn PID");
                 } catch (ElementNotFoundException e) {
@@ -296,6 +273,72 @@ public class DriveTrain extends Subsystem
         };
     }
 
+    public Command runMotionProfile(File left, File right)
+    {
+        return new Command()
+        {
+            MotionProfileExecutor leftExecutor, rightExecutor;
+            @Override
+            public boolean isFinished()
+            {
+                SetValueMotionProfile setValue;
+                try
+                {
+                    setValue = leftExecutor.getSetValue();
+                } catch (NullPointerException e) {
+                    DriverStation.reportWarning("LeftExecutor setValue is null", false);
+                    return false;
+                }
+               return setValue == SetValueMotionProfile.Hold;
+            }
+
+            @Override
+            public void start()
+            {
+                reset();
+                leftExecutor = new MotionProfileExecutor(left, leftA);
+                rightExecutor = new MotionProfileExecutor(right, rightA);
+
+                leftExecutor.reset();
+                rightExecutor.reset();
+
+                leftExecutor.start();
+                rightExecutor.start();
+            }
+
+            @Override
+            public void update()
+            {
+                leftExecutor.update();
+                rightExecutor.update();
+
+                leftA.set(ControlMode.MotionProfile, leftExecutor.getSetValue().value);
+                rightA.set(ControlMode.MotionProfile, rightExecutor.getSetValue().value);
+            }
+
+            @Override
+            public void done()
+            {
+                leftExecutor.reset();
+                rightExecutor.reset();
+                reset();
+            }
+
+            @Override
+            public void interrupt()
+            {
+                DriverStation.reportWarning("Motion Profile was ended prematurely", false);
+                done();
+            }
+
+            @Override
+            public String getName()
+            {
+                return "Run Motion Profile [left: " + left.getAbsolutePath() + " | right: " + right.getAbsolutePath() + "]";
+            }
+        };
+    }
+
     private void reset()
     {
         leftA.setSelectedSensorPosition(0, 0, 0);
@@ -303,20 +346,5 @@ public class DriveTrain extends Subsystem
 
         leftA.set(ControlMode.PercentOutput, 0);
         rightA.set(ControlMode.PercentOutput, 0);
-    }
-
-    private void updateCSV(double dt, double vel, double accel, double jerk)
-    {
-        if (!useFile) return;
-        String str = dt + "," + vel + "," + accel + "," + jerk + ",\n";
-        System.out.println(str);
-        char[] chars = str.toCharArray();
-        byte[] out = new byte[chars.length];
-        for (int i = 0; i < out.length; i++) out[i] = (byte)chars[i];
-        try {
-            fos.write(out);
-        } catch (IOException e) {
-            logError("Could not write to csv.");
-        }
     }
 }

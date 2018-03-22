@@ -8,6 +8,9 @@ import org.team2851.util.auton.Action;
 public class OuttakeCube implements Action
 {
     Intake intake = Intake.getInstance();
+    double power;
+
+    public OuttakeCube(double power) { this.power = power; }
     @Override
     public boolean isFinished() { return intake.isSubsystemActive(); }
 
@@ -27,6 +30,6 @@ public class OuttakeCube implements Action
     public void start()
     {
         Logger.println("Outtaking Cube");
-        intake.setCommand(intake.manipulateCube(Intake.IntakeDirection.OUTTAKE));
+        intake.setCommand(intake.manipulateCube(Intake.IntakeDirection.OUTTAKE, power));
     }
 }

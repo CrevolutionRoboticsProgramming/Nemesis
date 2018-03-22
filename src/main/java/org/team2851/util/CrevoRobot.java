@@ -1,6 +1,8 @@
 package org.team2851.util;
 
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import org.team2851.robot.auton.TestAuton;
 import org.team2851.util.auton.Auton;
 import org.team2851.util.auton.AutonExecutor;
 import org.team2851.util.subsystem.Subsystem;
@@ -15,6 +17,8 @@ public class CrevoRobot extends IterativeRobot
     private Vector<Subsystem> mSubsystems = new Vector<>();
     private SendableChooser autonomousChooser;
     private Subsystem testSubsystem;
+
+    public static boolean nearOnly = false;
 
     protected final void registerAuton(Auton auton)
     {
@@ -42,10 +46,12 @@ public class CrevoRobot extends IterativeRobot
         SmartDashboard.putData("Autonomous Mode", autonomousChooser);
     }
 
+    // TODO: Autonomous Selection Issue! NullPtrException
     @Override
     public final void autonomousInit()
     {
-        Auton autonSelected = (Auton)autonomousChooser.getSelected();
+        Auton autonSelected = new TestAuton();
+        nearOnly = Preferences.getInstance().getBoolean("Near Only", true);
         Logger.println("|-----[AUTON]-----|\nAuton Selected: " + autonSelected.getName());
         mAutonExecutor.setAuton(autonSelected);
         mAutonExecutor.start();

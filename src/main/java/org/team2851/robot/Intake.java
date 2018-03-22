@@ -16,7 +16,7 @@ public class Intake extends Subsystem
     private static Intake instance = new Intake();
     private Intake() { super("Intake"); }
     public static Intake getInstance() { return instance; }
-    private TalonSRX talonA, talonB;
+    private TalonSRX talonLeft, talonRight;
     private Controller controller;
 
     public enum IntakeDirection { INTAKE, OUTTAKE }
@@ -24,16 +24,16 @@ public class Intake extends Subsystem
     @Override
     public void init() {
         try {
-            talonA = ConfigFile.getTalonSRX("IntakeA");
-            talonB = ConfigFile.getTalonSRX("IntakeB");
-            talonB.set(ControlMode.Follower, talonA.getDeviceID());
+            talonLeft = ConfigFile.getTalonSRX("IntakeA");
+            talonRight = ConfigFile.getTalonSRX("IntakeB");
         } catch (ElementNotFoundException e) {
             isEnabled = false;
             logError("Intake could not initialize talons. Disabling...");
             return;
         }
-
         controller = Robot.copilot;
+        talonLeft.configContinuousCurrentLimit(10, 0);
+        talonRight.configContinuousCurrentLimit(10, 0);
     }
 
     @Override
@@ -44,27 +44,35 @@ public class Intake extends Subsystem
     {
         return new Command()
         {
+            double output;
+
             @Override
             public boolean isFinished() {
                 return false;
             }
 
             @Override
-            public void start() {
-                talonA.set(ControlMode.PercentOutput, 0);
+            public void start()
+            {
+                talonLeft.set(ControlMode.PercentOutput, 0);
+                talonRight.set(ControlMode.PercentOutput, 0);
             }
 
             @Override
             public void update()
             {
-                if (controller.leftTrigger.getValue() < -0.3) talonA.set(ControlMode.PercentOutput, 1); // Outtake
-                else if (controller.rightTrigger.getValue() < -0.3) talonA.set(ControlMode.PercentOutput, -1); // Intake
-                else talonA.set(ControlMode.PercentOutput, 0);
+                if (controller.leftTrigger.getValue() < -0.3) output = 1;
+                else if (controller.rightTrigger.getValue() < -0.3) output = -1;
+                else if (controller.leftBumper.getState()) output = 0.5;
+                else output = 0;
+
+                talonLeft.set(ControlMode.PercentOutput, output);
+                talonRight.set(ControlMode.PercentOutput, -output);
             }
 
             @Override
             public void done() {
-                talonA.set(ControlMode.PercentOutput, 0);
+                talonLeft.set(ControlMode.PercentOutput, 0);
             }
 
             @Override
@@ -79,31 +87,34 @@ public class Intake extends Subsystem
         };
     }
 
-    public Command manipulateCube(IntakeDirection direction)
+    public Command manipulateCube(IntakeDirection direction, double power)
     {
         return new Command() {
             Timer t = new Timer();
-            double power = 1;
+            double powerA = 1 * power;
 
             @Override
             public boolean isFinished() {
-                return t.get() > 1;
+                return t.get() > 2;
             }
 
             @Override
+
             public void start() {
                 t.start();
-                if (direction == IntakeDirection.INTAKE) power *= -1;
+                if (direction != IntakeDirection.INTAKE) powerA *= -1;
             }
 
             @Override
             public void update() {
-                talonA.set(ControlMode.PercentOutput, power);
+                talonLeft.set(ControlMode.PercentOutput, powerA);
+                talonRight.set(ControlMode.PercentOutput, powerA);
             }
 
             @Override
             public void done() {
-                talonA.set(ControlMode.PercentOutput, 0);
+                talonLeft.set(ControlMode.PercentOutput, 0);
+                talonRight.set(ControlMode.PercentOutput, 0);
             }
 
             @Override

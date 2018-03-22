@@ -1,9 +1,9 @@
-<Controller port="1" name="pilot">
+<Controller port="0" name="pilot">
     <Button id="a" mode="raw"/>
     <Button id="b" mode="raw"/>
     <Button id="x" mode="raw"/>
     <Button id="y" mode="raw"/>
-    <Button id="leftBumper" mode="raw"/>
+    <Button id="leftBumper" mode="toggle"/>
     <Button id="rightBumper" mode="raw"/>
     <Button id="start" mode="raw"/>
     <Button id="select" mode="raw"/>

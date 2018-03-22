@@ -5,7 +5,7 @@
     <TalonSRX port="10" name="talonRightB" isInverted="false"/>
     <TalonSRX port="14" name="talonLift" isInverted="false"/>
     <TalonSRX port="2" name="IntakeA" isInverted="false"/>
-    <TalonSRX port="14" name="IntakeB" isInverted="false"/>
+    <TalonSRX port="29" name="IntakeB" isInverted="false"/>
     <PID name="Trajectory PID" p="0.2" i="0.001"/>
     <PID name="Turn PID" p="0.09" i="0.0002"/>
     <Double name="turnMult" value="0.31"/>

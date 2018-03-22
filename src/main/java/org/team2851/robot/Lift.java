@@ -57,7 +57,7 @@ public class Lift extends Subsystem
             logError("Could not find talon element. Disabling subsystem.");
         }
 
-        useDefaultAlways = true;
+        useDefaultAlways = false;
     }
 
     @Override
@@ -128,6 +128,8 @@ public class Lift extends Subsystem
                 else if (c.b.getState()) talon.set(ControlMode.PercentOutput, -.5);
                 else if (c.x.getState()) talon.set(ControlMode.PercentOutput, 0.15); // Stalls motor (Keeps lift up)
                 else talon.set(ControlMode.PercentOutput, 0);
+
+                System.out.println("Lift Current Draw: " + talon.getOutputCurrent());
 //                if (c.leftTrigger.getValue() > 0.3)
 //                {
 //                    if (c.a.getState()) talon.set(ControlMode.PercentOutput, 0.1);
@@ -236,20 +238,21 @@ public class Lift extends Subsystem
             double power;
             @Override
             public boolean isFinished() {
-                return false;
+                return t.get() > time;
             }
 
             @Override
             public void start()
             {
                 t.start();
-                power = (goingDown) ? -0.6 : 0.8;
+                power = (goingDown) ? -0.3 : 0.8;
             }
 
             @Override
             public void update()
             {
-                if (t.get() < time) talon.set(ControlMode.PercentOutput, power);
+                System.out.println(power);
+                talon.set(ControlMode.PercentOutput, power);
             }
 
             @Override
