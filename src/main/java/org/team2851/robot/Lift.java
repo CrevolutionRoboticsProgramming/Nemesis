@@ -90,7 +90,10 @@ public class Lift extends Subsystem
             public boolean isFinished() { return false; }
 
             @Override
-            public void start() { }
+            public void start()
+            {
+                if (Preferences.getInstance().getBoolean("Single Controller", false)) c = Robot.pilot;
+            }
 
             @Override
             public void update()

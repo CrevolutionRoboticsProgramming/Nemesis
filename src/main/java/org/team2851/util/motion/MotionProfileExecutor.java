@@ -33,6 +33,7 @@ public class MotionProfileExecutor
 
     public MotionProfileExecutor(File file, TalonSRX talon)
     {
+        System.out.println("Starting to create profile");
         _profile = new MotionProfile()
         {
             Trajectory trajectory = Pathfinder.readFromCSV(file);
@@ -46,16 +47,18 @@ public class MotionProfileExecutor
             @Override
             public double[][] getPoints()
             {
-                double[][] points = new double[trajectory.segments.length][3];
+                double[][] points = new double[trajectory.segments.length][4];
                 for (int i = 0; i < getNumberOfPoints(); i++)
                 {
                     points[i][0] = trajectory.segments[i].position;
                     points[i][1] = trajectory.segments[i].velocity * (1 / (0.5 * Math.PI)) * 60;
                     points[i][2] = trajectory.segments[i].dt;
+//                    points[i][4] = trajectory.segments[i].heading;
                 }
                 return points;
             }
         };
+        System.out.println("Finished");
 
         _talon = talon;
         _timer.scheduleAtFixedRate(new PeriodicUpdate(), 0, 5);
@@ -64,7 +67,8 @@ public class MotionProfileExecutor
     private class PeriodicUpdate extends TimerTask
     {
         @Override
-        public void run() { _talon.processMotionProfileBuffer(); }
+        public void run() {
+            _talon.processMotionProfileBuffer(); }
     }
 
     public void update()
@@ -81,7 +85,6 @@ public class MotionProfileExecutor
                 reset();
                 break;
             case LOADING:
-                System.out.println("Filling");
                 _setValue = SetValueMotionProfile.Disable;
                 _state = State.RUNNING;
                 try { fillBuffer(); } catch (InvalidMotionProfileException e) { _state = State.DISABLED; }
@@ -89,7 +92,6 @@ public class MotionProfileExecutor
             case RUNNING:
                 if (_status.btmBufferCnt > 5)
                 {
-                    System.out.println("Enabling");
                     _setValue = SetValueMotionProfile.Enable;
                     _state = State.COMPLETE;
                 }

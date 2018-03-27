@@ -8,8 +8,14 @@ public class TurnToAngle implements Action
     private double angle;
     private DriveTrain driveTrain = DriveTrain.getInstance();
     private boolean isFinished = false;
+    public enum Mode { GYRO, ENC }
+    private Mode mode;
 
-    public TurnToAngle(double angle) { this.angle = angle; }
+    public TurnToAngle(double angle, Mode mode)
+    {
+        this.angle = angle;
+        this.mode = mode;
+    }
 
     @Override
     public boolean isFinished() {
@@ -26,7 +32,11 @@ public class TurnToAngle implements Action
     }
 
     @Override
-    public void start() {
-        driveTrain.setCommand(driveTrain.turnToAngle(angle));
+    public void start()
+    {
+        if (mode == Mode.GYRO)
+            driveTrain.setCommand(driveTrain.turnToAngle(angle));
+        else if (mode == Mode.ENC)
+            driveTrain.setCommand(driveTrain.turnToAngleEncoder(angle));
     }
 }

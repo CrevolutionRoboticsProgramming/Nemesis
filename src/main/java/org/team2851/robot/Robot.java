@@ -13,9 +13,8 @@ public class Robot extends CrevoRobot
         registerSubsystem(Lift.getInstance());
         registerSubsystem(Intake.getInstance());
 
-        registerAuton(new Left());
         registerAuton(new Right());
-        registerAuton(new BaselineGucciSide());
+        registerAuton(new Left());
         registerAuton(new Center());
         registerAuton(new TestAuton());
 

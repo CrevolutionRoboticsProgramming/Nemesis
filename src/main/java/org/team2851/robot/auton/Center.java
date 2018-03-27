@@ -18,25 +18,23 @@ public class Center extends Auton
 
         if (side == MatchData.OwnedSide.LEFT)
         {
-            runAction(new MoveLift(1, false));
+            runAction(new MoveLift(1.5, false));
             runAction(new Wait(0.5));
-            runAction(new TimedDrive(0.9, 0.5, 0.7));
+            runAction(new TimedDrive(1, 0.5, 0.8));
             runAction(new TimedDrive(0.7, 0.5, 0.5));
-            runAction(new TimedDrive(0.45, 0.8, 0.3));
+            runAction(new TimedDrive(0.7, 0.8, 0.3));
+            runAction(new TimedDrive(0.5, 0.3, 0.3));
             runAction(new Wait(0.5));
             runAction(new OuttakeCube(0.9));
-//            runAction(new TimedDrive(0.9, 0.7, 0.5));
         } else if (side == MatchData.OwnedSide.RIGHT) {
-            runAction(new MoveLift(1, false));
+            runAction(new MoveLift(1.5, false));
             runAction(new Wait(0.5));
             runAction(new TimedDrive(0.9, 0.8, 0.5));
             runAction(new TimedDrive(0.2, 0.7, 0.5));
             runAction(new TimedDrive(0.5, 0.55, 0.5));
-            runAction(new TimedDrive(0.4, 0, 0.5));
+            runAction(new TimedDrive(0.9, 0, 0.5));
             runAction(new Wait(0.5));
             runAction(new OuttakeCube(0.9));
-//            runAction(new TimedDrive(0.7, 0.5, 0.5));
-//            runAction(new TimedDrive(0.45, 0.8, 0.3));
         }
     }
 }

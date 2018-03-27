@@ -3,6 +3,7 @@ package org.team2851.robot;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.Timer;
 import org.team2851.util.ConfigFile;
@@ -23,6 +24,7 @@ public class Intake extends Subsystem
 
     @Override
     public void init() {
+        Preferences.getInstance().putBoolean("Single Controller", false);
         try {
             talonLeft = ConfigFile.getTalonSRX("IntakeA");
             talonRight = ConfigFile.getTalonSRX("IntakeB");
@@ -45,6 +47,7 @@ public class Intake extends Subsystem
         return new Command()
         {
             double output;
+            boolean singleController;
 
             @Override
             public boolean isFinished() {
@@ -54,6 +57,9 @@ public class Intake extends Subsystem
             @Override
             public void start()
             {
+                singleController = Preferences.getInstance().getBoolean("Single Controller", false);
+                if (singleController) controller = Robot.pilot;
+                else controller = Robot.copilot;
                 talonLeft.set(ControlMode.PercentOutput, 0);
                 talonRight.set(ControlMode.PercentOutput, 0);
             }
@@ -67,7 +73,7 @@ public class Intake extends Subsystem
                 else output = 0;
 
                 talonLeft.set(ControlMode.PercentOutput, output);
-                talonRight.set(ControlMode.PercentOutput, -output);
+                talonRight.set(ControlMode.PercentOutput, output);
             }
 
             @Override

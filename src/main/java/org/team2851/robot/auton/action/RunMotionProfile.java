@@ -1,6 +1,5 @@
 package org.team2851.robot.auton.action;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import org.team2851.robot.DriveTrain;
 import org.team2851.util.auton.Action;
 
@@ -18,6 +17,7 @@ public class RunMotionProfile implements Action
     @Override
     public void done() { }
 
+    // TODO: Motion Profile Arc vs Motion Profile Mode (Heading Compensation)
     @Override
-    public void start() { _driveTrain.setCommand(_driveTrain.runMotionProfile(new File("/home/lvuser/motion/test.csv"), new File("/home/lvuser/motion/test.csv"))); }
+    public void start() { _driveTrain.setCommand(_driveTrain.runMotionProfile(new File("/home/lvuser/motion/Left_Switch_right_detailed.csv"), new File("/home/lvuser/motion/Left_Switch_left_detailed.csv"))); }
 }

@@ -1,5 +1,8 @@
 package org.team2851.util;
 
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.cscore.VideoSink;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.team2851.robot.auton.TestAuton;
@@ -44,13 +47,21 @@ public class CrevoRobot extends IterativeRobot
         Logger.println("|-----[ROBOT INIT]-----|");
         for (Subsystem s : mSubsystems) s.start();
         SmartDashboard.putData("Autonomous Mode", autonomousChooser);
+        CameraServer.getInstance().addServer("CustomCamera", 1185);
+
+        new Thread(() -> {
+            UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
+            VideoSink server = CameraServer.getInstance().getServer("CustomCamera");
+            camera.setResolution(640, 480);
+            server.setSource(camera);
+        }).start();
     }
 
     // TODO: Autonomous Selection Issue! NullPtrException
     @Override
     public final void autonomousInit()
     {
-        Auton autonSelected = new TestAuton();
+        Auton autonSelected = (Auton)autonomousChooser.getSelected();
         nearOnly = Preferences.getInstance().getBoolean("Near Only", true);
         Logger.println("|-----[AUTON]-----|\nAuton Selected: " + autonSelected.getName());
         mAutonExecutor.setAuton(autonSelected);
@@ -78,5 +89,5 @@ public class CrevoRobot extends IterativeRobot
     public final void autonomousPeriodic() {}
 
     @Override
-    public void teleopPeriodic() {}
+    public final void teleopPeriodic() {}
 }
